@@ -1,0 +1,81 @@
+\documentclass[a4paper,addpoints]{article}
+\usepackage{amsfonts,amssymb,amsmath, amsthm}
+\usepackage{xcolor}
+\usepackage{pgf,tikz,pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes, arrows, fit, positioning}
+\usepackage{tabu}
+
+\usepackage{tikz-uml}
+
+% Palette colori coordinata e rilassante
+\definecolor{userColor}{RGB}{230, 242, 255}    % Azzurro tenue per gli Utenti
+\definecolor{bookColor}{RGB}{240, 255, 240}    % Verde tenue per i Libri/Catalogo
+\definecolor{actionColor}{RGB}{255, 245, 230}  % Arancio tenue per Azioni/Recensioni
+
+\tikzumlset{
+    fill class=white,
+    text=black, 
+    draw=black!80,
+    font=\small\ttfamily
+}
+
+\begin{document}
+
+\vspace{1cm}
+\begin{center}
+\begin{tikzpicture}[scale=0.9, transform shape]
+
+% =========================================================================
+% LIVELLO 1 (SUPERIORE): GLI UTENTI E L'ACCESSO
+% =========================================================================
+\umlsimpleclass[x=-5, y=4, fill=userColor] {Visitatore}
+\umlclass[x=0, y=4, fill=userColor]{UtenteRegistrato}{Nome : string \\ email: string }{}
+\umlclass[x=5, y=4, fill=userColor]{UtentePremium}{Scadenza : date}{attivaAbbonamento() : void}
+
+% Relazioni lineari del Livello 1
+\umlinherit{UtenteRegistrato}{Visitatore}
+\umlinherit{UtentePremium}{UtenteRegistrato}
+
+
+% =========================================================================
+% LIVELLO 2 (CENTRALE): IL CUORE DEL DOMINIO (LIBRI E CATALOGO)
+% =========================================================================
+\umlsimpleclass[x=-5, y=0, fill=bookColor]{Catalogo}
+\umlclass[x=0, y=0, fill=bookColor]{Libro}{Titolo : string \\ Autore : string}{}
+
+% Associazione orizzontale standard per il catalogo
+\umlassoc[mult1=*, mult2=1..*, pos=0.5]{Libro}{Catalogo} 
+
+% ASSOCIAZIONE PRINCIPALE: Linea verticale pulita tra Utente e Libro
+\umlassoc[name=assocUtenteLibro, mult1=*, mult2=0..1, pos=0.2]{UtenteRegistrato}{Libro}
+
+
+% =========================================================================
+% CLASSE ASSOCIATIVA CON TRATTEGGIO IN MEZZERIA STANDARD
+% =========================================================================
+\umlclass[x=5, y=1.5, fill=actionColor]{InterazioneLibro}{Tipo: string \\ Data : date}{}
+
+% Disegna la linea tratteggiata che parte da InterazioneLibro e finisce 
+% esattamente a metà (0.5) della retta tra UtenteRegistrato e Libro
+\draw[dashed, thick] (InterazioneLibro.west) -- ($(UtenteRegistrato)!0.5!(Libro)$);
+
+
+% =========================================================================
+% LIVELLO 3 (INFERIORE): DETTAGLI E CONTRIBUTI
+% =========================================================================
+\umlclass[x=-3, y=-4, fill=bookColor]{SchedaTecnica}{Genere : string \\ Pagine : int}{}
+\umlsimpleclass[x=3, y=-4, fill=actionColor] {Recensione}
+
+% Relazioni del Livello 3 (Composizione e Associazione verso il basso)
+\umlcompo[mult1=1, mult2=1, pos=0.5]{Libro}{SchedaTecnica}
+\umlassoc[mult1=1, mult2=1..*, pos=0.5]{UtenteRegistrato}{Recensione} 
+
+\end{tikzpicture}
+\end{center}
+
+\end{document} 

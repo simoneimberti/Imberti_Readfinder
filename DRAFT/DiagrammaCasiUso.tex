@@ -1,0 +1,90 @@
+\documentclass[a4paper,addpoints]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsfonts,amssymb,amsmath, amsthm}
+\usepackage{xcolor}
+\usepackage{pgf,tikz,pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{tabu}
+
+\usepackage{tikz}
+\usetikzlibrary {shapes , arrows , fit , calc, positioning}
+\tikzset{box/.style={draw, rectangle, rounded corners, thick, node distance =7 em, text width =6 em, text centered, minimum height =2.5 em}}
+\tikzset{line/.style={draw, thick, -latex'}}
+
+\usepackage{tikz-uml}
+\tikzumlset{actor below=0.4cm, fill usecase=white, fill class=white, text=black, draw=black}
+
+\begin{document}
+
+\textbf{ReadFinder} --- web app per cercare e analizzare libri.
+Il \emph{Visitatore} (utente non registrato) pu\`o sfogliare e cercare i libri e consultarne le informazioni base; 
+l'\emph{Utente registrato} (eredita dal Visitatore) dopo il login gestisce la propria libreria, 
+mette ``mi piace'' e scrive recensioni. Infine, l'\emph{Utente Premium} (eredita dall'Utente registrato) 
+pu\`o attivare l'abbonamento e accedere alla scheda tecnica dettagliata dei libri.
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.72, transform shape]
+    \begin{umlsystem}[x=4]{ReadFinder}
+        % Colonna A (Azioni principali)
+        \umlusecase[name=registrati, x=4,    y=0,     width=2.8cm]{Registrati}
+        \umlusecase[name=sfoglia,    x=4,    y=-2.5,  width=2.8cm]{Sfoglia libreria}
+        \umlusecase[name=cerca,      x=4,    y=-5,    width=2.8cm]{Cerca libro}
+        \umlusecase[name=libreria,   x=4,    y=-10.5, width=2.8cm]{Gestisci libreria personale}
+        \umlusecase[name=recens,     x=4,    y=-13,   width=2.8cm]{Scrivi recensione}
+        \umlusecase[name=abbonam,    x=4,    y=-16.5, width=2.8cm]{Attiva abbonamento}
+
+        % Colonna B (Estensioni e Login)
+        \umlusecase[name=info,       x=10,   y=-2.5,  width=2.8cm]{Visualizza info libro}
+        \umlusecase[name=filtri,     x=10,   y=-5,    width=2.8cm]{Applica filtri}
+        \umlusecase[name=login,      x=10,   y=-10.5, width=2.8cm]{Login}
+        \umlusecase[name=scheda,     x=10,   y=-16.5, width=2.8cm]{Consulta scheda tecnica}
+
+        % Colonna C (Azioni rapide)
+        \umlusecase[name=like,       x=15.5, y=-8,    width=2.8cm]{Aggiungi ``mi piace''}
+    \end{umlsystem}
+
+    % --- ATTORI E GERARCHIA ---
+    \umlactor[x=0, y=-2.5] {Visitatore}
+    \umlactor[x=0, y=-10]  {Utente registrato}
+    \umlactor[x=0, y=-16.5]{Utente Premium}
+
+    % Ereditarietà verticale pulita
+    \umlinherit{Utente registrato}{Visitatore}
+    \umlinherit{Utente Premium}{Utente registrato}
+
+    % --- ASSOCIAZIONI VISITATORE ---
+    \umlassoc{Visitatore}{registrati}
+    \umlassoc{Visitatore}{sfoglia}
+    \umlassoc{Visitatore}{cerca}
+
+    % --- ASSOCIAZIONI UTENTE REGISTRATO ---
+    \umlassoc{Utente registrato}{login}
+    \umlassoc{Utente registrato}{libreria}
+    \umlassoc{Utente registrato}{recens}
+    \umlassoc{Utente registrato}{like}
+
+    % --- ASSOCIAZIONI UTENTE PREMIUM ---
+    \umlassoc{Utente Premium}{abbonam}
+    \umlassoc{Utente Premium}{scheda}
+
+    % --- RELAZIONI INCLUDE ED EXTEND ---
+    \umlextend{info}{sfoglia}
+    \umlextend{filtri}{cerca}
+    
+    \umlinclude{like}{login}
+    \umlinclude{libreria}{login}
+    \umlinclude{recens}{login}
+    \umlinclude{abbonam}{login}
+    \umlinclude{scheda}{login}
+\end{tikzpicture}
+\end{center}
+
+\end{document}

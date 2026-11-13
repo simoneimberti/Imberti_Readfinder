@@ -1,0 +1,104 @@
+\documentclass[border=15pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{tikz}
+\usetikzlibrary{er, positioning, shapes.geometric}
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=1.2cm and 2.0cm,
+    edge/.style={draw=gray!80, thick},
+    entity/.style={draw=black, fill=blue!5, thick, minimum width=2.5cm, minimum height=1cm},
+    relationship/.style={shape=diamond, draw=black, thick, aspect=1.5, minimum width=2cm, inner sep=2pt},    
+    attribute/.style={circle, draw=black, fill=white, thick, minimum size=6pt, inner sep=0pt},
+    attribute-multivalue/.style={ellipse, draw=black, thick, inner sep=3pt, font=\small},
+    isa/.style={shape=triangle, draw=black, thick, minimum size=0.6cm, shape border rotate=180, inner sep=0pt}
+]
+
+    % =========================================================================
+    % 1. AREA UTENTI (ALLINEAMENTO SINISTRO)
+    % =========================================================================
+    \node[entity] (user) {UtenteRegistrato};
+    \node[attribute, label=above:{\underline{IDUtente}}] (uid) [above=of user] {} edge (user);
+    \node[attribute, label=left:{Nome}] (uname) [left=of user] {} edge (user);
+    \node[attribute, label=above left:{Email}] (uemail) [above left=of user] {} edge (user);
+
+    % Gerarchia ISA sviluppata in verticale/orizzontale pulita
+    \node[isa] (isa_user) [below=0.5cm of user] {ISA};
+    \draw[edge] (user) -- (isa_user);
+
+    \node[entity] (visitor) [left=2cm of isa_user] {Visitatore};
+    \draw[edge] (isa_user) -- (visitor);
+
+    \node[entity] (premium) [right=2cm of isa_user] {UtentePremium};
+    \node[attribute, label=below:{Scadenza}] (expiry) [below=of premium] {} edge (premium);
+    \draw[edge] (isa_user) -- (premium);
+
+
+    % =========================================================================
+    % 2. AREA INTERAZIONE CENTRALE (EX CLASSE ASSOCIATIVA)
+    % =========================================================================
+    \node[relationship] (interact) [right=4.5cm of user] {Interazione} 
+        edge node[above, font=\small] {N} (user);
+    
+    % Attributi della relazione disposti a ventaglio sopra per non incrociare
+    \node[attribute, label=above left:{Tipo}] (itype) [above left=1.2cm and 0.5cm of interact] {} edge (interact);
+    \node[attribute, label=above:{Data}] (idate) [above=of interact] {} edge (interact);
+    \node[attribute, label=above right:{MiPiace}] (ilike) [above right=1.2cm and 0.5cm of interact] {} edge (interact);
+
+
+    % =========================================================================
+    % 3. AREA LIBRO (ALLINEAMENTO DESTRO)
+    % =========================================================================
+    \node[entity] (book) [right=4.5cm of interact] {Libro} 
+        edge node[above, font=\small] {M} (interact);
+        
+    \node[attribute, label=above left:{\underline{ISBN}}] (isbn) [above left=of book] {} edge (book);
+    \node[attribute, label=right:{Titolo}] (title) [right=of book] {} edge (book);
+    \node[attribute, label=above right:{Autore}] (author) [above right=of book] {} edge (book);
+
+
+    % =========================================================================
+    % 4. SEZIONE CATALOGO (ALTO DESTRA)
+    % =========================================================================
+    \node[relationship] (belongs) [above=2.5cm of book] {Appartiene}
+        edge node[left, font=\small] {N} (book);
+        
+    \node[entity] (catalog) [above=of belongs] {Catalogo}
+        edge node[left, font=\small] {M} (belongs);
+        
+    \node[attribute, label=right:{\underline{IDCatalogo}}] (catid) [right=of catalog] {} edge (catalog);
+
+
+    % =========================================================================
+    % 5. SEZIONE SCHEDA TECNICA (BASSO DESTRA)
+    % =========================================================================
+    \node[relationship] (has) [below=2.5cm of book] {Ha}
+        edge node[left, font=\small] {1} (book);
+        
+    \node[entity] (details) [below=of has] {SchedaTecnica}
+        edge node[left, font=\small] {1} (has);
+        
+    \node[attribute, label=left:{Genere}] (genre) [left=of details] {} edge (details);
+    \node[attribute, label=right:{Pagine}] (pages) [right=of details] {} edge (details);
+
+
+    % =========================================================================
+    % 6. SEZIONE RECENSIONE (BASSO CENTRALE - PERCORSI LIBERI)
+    % =========================================================================
+    \node[entity] (review) [below=6.5cm of interact] {Recensione};
+    \node[attribute, label=below:{Testo}] (rtext) [below left=of review] {} edge (review);
+    \node[attribute, label=below:{Valutazione}] (rscore) [below right=of review] {} edge (review);
+
+    % Relazione d'origine dall'UtenteRegistrato (passa esternamente a sinistra dell'ISA)
+    \node[relationship] (writes) [above left=2.5cm and 1.5cm of review] {Scrive};
+    \draw[edge] (user) -- node[left, font=\small] {1} (writes);
+    \draw[edge] (writes) -- node[below left, font=\small] {N} (review);
+
+    % Relazione di riferimento al Libro (scende sul lato destro)
+    \node[relationship] (refers) [above right=2.5cm and 1.5cm of review] {RiferitaA};
+    \draw[edge] (book) -- node[right, font=\small] {1} (refers);
+    \draw[edge] (refers) -- node[below right, font=\small] {N} (review);
+
+\end{tikzpicture}
+\end{document}
